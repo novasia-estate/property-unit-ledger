@@ -1,0 +1,33 @@
+name: Verify
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - elixir: '1.15'
+            otp: '26'
+          - elixir: '1.18'
+            otp: '27'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+      - run: mix local.hex --force
+      - run: mix deps.get
+      - run: mix test
+      - run: mix run examples/conflict_review.exs
+      - run: mix docs --warnings-as-errors
+      - run: mix hex.build
+      - uses: actions/upload-artifact@v4
+        if: matrix.elixir == '1.18'
+        with:
+          name: property-unit-ledger-package
+          path: |
+            property_unit_ledger-1.0.0.tar
+            doc/
