@@ -56,7 +56,7 @@ This library does not establish availability at the developer, validate a deposi
 * [Events and transitions](docs/events.md)
 * [Persistence, concurrency and feed integration](docs/integration.md)
 * [Limits and time semantics](docs/limits.md)
-* [Runnable conflict scenario](examples/conflict_review.exs)
+* [Runnable conflict scenario](https://github.com/novasia-estate/property-unit-ledger/blob/main/examples/conflict_review.exs)
 
 `mix test` runs behavioral tests. `mix run examples/conflict_review.exs` demonstrates rejected double booking and explicit expiry. `mix docs` generates reference documentation; `mix hex.build` creates a publishable package.
 
