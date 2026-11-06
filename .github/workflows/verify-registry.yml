@@ -1,0 +1,28 @@
+name: Registry installation
+on:
+  push:
+    paths: ['.github/workflows/verify-registry.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27'
+          elixir-version: '1.18'
+      - run: mix local.hex --force
+      - run: |
+          mkdir /tmp/ledger-consumer
+          cd /tmp/ledger-consumer
+          cat > mix.exs <<'EOF'
+          defmodule Consumer.MixProject do
+            use Mix.Project
+            def project, do: [app: :consumer, version: "0.1.0", deps: [{:property_unit_ledger, "== 1.0.0"}]]
+          end
+          EOF
+          mix deps.get
+          mix run "$GITHUB_WORKSPACE/examples/conflict_review.exs"
