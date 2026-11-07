@@ -36,6 +36,23 @@ defmodule PropertyUnitLedger do
     %{ledger: state, rejected: Enum.reverse(errors)}
   end
 
+  @doc """
+  Replay as an all-or-nothing import, keeping the original ledger if any event is rejected.
+
+  Returns the same ordered rejection details as `replay/2`, plus `:committed?`.
+  Valid events are simulated in input order to discover subsequent errors, but a
+  rejected batch exposes no partial ledger or journal. Exact duplicate events
+  retain their existing idempotency behavior. This is an in-memory operation;
+  persistence still needs the caller's transaction or version check.
+  """
+  def replay_atomic(events, ledger \\ %__MODULE__{}) do
+    result = replay(events, ledger)
+    case result.rejected do
+      [] -> Map.put(result, :committed?, true)
+      errors -> %{ledger: ledger, rejected: errors, committed?: false}
+    end
+  end
+
   @doc "Accepted events in their original processing order."
   def history(%__MODULE__{} = ledger), do: Enum.reverse(ledger.journal)
 

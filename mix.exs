@@ -1,7 +1,7 @@
 defmodule PropertyUnitLedger.MixProject do
   use Mix.Project
   def project do
-    [app: :property_unit_ledger, version: "1.0.0", elixir: "~> 1.15",
+    [app: :property_unit_ledger, version: "1.2.0", elixir: "~> 1.15",
      start_permanent: Mix.env() == :prod,
      description: "Replay and reconcile property-unit reservations with explicit deadlines and an immutable audit trail.",
      package: [licenses: ["MIT"], files: ["lib", "mix.exs", "README.md", "LICENSE", "CHANGELOG.md", "docs", "examples"],

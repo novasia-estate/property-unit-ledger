@@ -43,7 +43,7 @@ Ledger.due(result.ledger, ~U[2026-11-07 10:00:00Z]) # one due reservation
 * A deadline that does not follow the reservation time.
 * Reopening a sold or withdrawn unit through an unrelated event.
 
-Exact duplicates return the existing ledger unchanged. `replay/2` continues after invalid events and returns their input indices and reasons. Failed events do not enter the accepted journal. For all-or-nothing imports, discard a replay result that has any rejections rather than saving its partial state.
+Exact duplicates return the existing ledger unchanged. `replay/2` continues after invalid events and returns their input indices and reasons. Failed events do not enter the accepted journal. For all-or-nothing imports, use `replay_atomic/2` (new in1.2): a rejected batch returns the original ledger and `committed?: false`, while retaining every indexed rejection. A valid batch returns its new ledger and `committed?: true`. No partial units, accepted journal or seen-ID state escapes from a rejected atomic batch. `replay/2` retains its original partial-acceptance behavior.
 
 ## Use in an agency backend
 
@@ -65,3 +65,16 @@ This library does not establish availability at the developer, validate a deposi
 Developed by [NovAsia Estate](https://novasia.estate/), which publishes property research and guides for Cambodia, Thailand and Bali. The state machine is jurisdiction-independent and contains no inventory or personal data. MIT licensed; contributions with minimal synthetic reproductions are welcome.
 
 For a separate pre-import validation stage, see [Listing Import Guard](https://github.com/novasia-estate/listing-import-guard). It checks incoming CSV fields; this component handles subsequent inventory events.
+
+## Atomic import example (1.2)
+
+```elixir
+result = Ledger.replay_atomic(events, current_ledger)
+if result.committed? do
+  # Persist result.ledger within your own transaction/version check.
+else
+  # result.ledger is exactly current_ledger; show result.rejected for correction.
+end
+```
+
+Run `mix run examples/atomic_import.exs` for a rejected two-unit import and its corrected retry. Errors are evaluated using the same input-order simulation as `replay/2`; later rejection reasons may depend on earlier simulated successes. Atomic means one in-memory import, not a multi-writer database transaction or a lock at a developer. Empty and identical-retry batches are valid.

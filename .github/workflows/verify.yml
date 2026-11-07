@@ -22,6 +22,7 @@ jobs:
       - run: mix deps.get
       - run: mix test
       - run: mix run examples/conflict_review.exs
+      - run: mix run examples/atomic_import.exs
       - run: mix docs --warnings-as-errors
       - run: mix hex.build
       - uses: actions/upload-artifact@v4
@@ -29,5 +30,5 @@ jobs:
         with:
           name: property-unit-ledger-package
           path: |
-            property_unit_ledger-1.0.0.tar
+            property_unit_ledger-1.2.0.tar
             doc/
